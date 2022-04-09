@@ -1,4 +1,4 @@
-import { getMaxListeners } from 'process';
+
 import React, { Component, useEffect, useState } from 'react';
 
 import {
@@ -16,7 +16,8 @@ import {
 } from 'react-native';
 
 import WifiManager from 'react-native-wifi-reborn';
-
+import Icon from 'react-native-vector-icons/FontAwesome';
+import Ionicons from 'react-native-vector-icons/Ionicons'
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -63,24 +64,24 @@ function Home({navigation}) {
         call()
     }, [])
 
+    const loadList = async ()=>{
+        try {
+            console.log('load')
+            const newWifilist = await WifiManager.loadWifiList()
+            // if(newWifilist.length!=wifiList.length){
+                
+            // }
+            setWifiList(newWifilist)
+            console.log(newWifilist)
+        } catch (error) {
+            console.warn('loadlist', error)
+        }
+    }
     useEffect(() => {
-        async function loadList() {
-            try {
-                const newWifilist = await WifiManager.loadWifiList()
-                console.log('newlist', newWifilist.length)
-                if(newWifilist.length!=wifiList.length){
-                    setWifiList(newWifilist)
-                }
-            } catch (error) {
-                //console.warn('loadlist', error)
-            }
-        }
-        const interval = setInterval(loadList, 5000)
-        return () => {
-            console.log('unmount',interval)
-            return clearInterval(interval)
-        }
+        loadList()
     }, [])
+
+    
 
     
 
@@ -93,7 +94,7 @@ function Home({navigation}) {
                             wifiItem:item
                         })} >
                             <View>
-                                <Image style={{ width: 40, height: 40 }} />
+                                <Icon name="wifi" size={30} color="#252954" />
                             </View>
                             <View>
                                 <Text style={styles.itemText}>SSID: {item.SSID}</Text>
@@ -104,6 +105,11 @@ function Home({navigation}) {
                     )
                 })}
             </ScrollView>
+            <View style={styles.tabContainer}>
+                <Icon.Button name="home" size={30} backgroundColor="#252954" color="#E64F59" ></Icon.Button>
+                <Icon.Button name="search" size={30} backgroundColor="#252954" color="#E64F59" onPress={()=>loadList()} ></Icon.Button>
+                <Icon.Button name='align-justify' size={30} backgroundColor="#252954" color="#E64F59"></Icon.Button>
+            </View>
         </SafeAreaView>
     );
 }
@@ -130,6 +136,16 @@ const styles = StyleSheet.create({
     },
     itemText: {
         fontWeight: 'bold', color: "white"
+    },
+    tabContainer:{
+        backgroundColor:"#252954",
+        width:windowWidth,
+        height:60,
+        flexDirection:'row',
+        justifyContent:'space-around',
+        alignItems:'center',
+        borderTopLeftRadius:20,
+        borderTopRightRadius:20
     }
 });
 

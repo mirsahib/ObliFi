@@ -1,4 +1,4 @@
-import React from 'react'
+import React,{useEffect, useState } from 'react'
 import {
   SafeAreaView,
   StatusBar,
@@ -12,10 +12,21 @@ import {
   TouchableOpacity,
   Button
 } from 'react-native';
-import { useEffect } from 'react/cjs/react.production.min';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import AntIcon from 'react-native-vector-icons/AntDesign'
+
 const windowWidth = Dimensions.get('window').width;
 
 const reminderItem = [{
+  text: "Laptop charger"
+}, {
+  text: "Mobile charger"
+}, {
+  text: "Car key"
+}, {
+  text: "Pen"
+},
+{
   text: "Laptop charger"
 }, {
   text: "Mobile charger"
@@ -28,11 +39,11 @@ const reminderItem = [{
 function Reminder({ route, navigation }) {
   const { wifiItem } = route.params
   console.log(wifiItem)
-  // useEffect(()=>{
-  //   if(!wifiItem){
-  //     wifiItem = {"BSSID": "50:d2:f5:b8:b5:01", "SSID": "Miraj", "capabilities": "[WPA-PSK-TKIP+CCMP][WPA2-PSK-TKIP+CCMP][RSN-PSK-TKIP+CCMP][ESS][WPS][WFA-HT]", "frequency": 2462, "level": -50, "timestamp": 263177937827, "wifiItem": {"BSSID": "70:4f:57:a5:3a:60", "SSID": "Akkhor", "capabilities": "[WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS][WPS][WFA-HT]", "frequency": 2417, "level": -53, "timestamp": 264057362487}}
-  //   }
-  // },[])
+  useEffect(()=>{
+    if(!wifiItem){
+      wifiItem = {"BSSID": "50:d2:f5:b8:b5:01", "SSID": "Miraj", "capabilities": "[WPA-PSK-TKIP+CCMP][WPA2-PSK-TKIP+CCMP][RSN-PSK-TKIP+CCMP][ESS][WPS][WFA-HT]", "frequency": 2462, "level": -50, "timestamp": 263177937827, "wifiItem": {"BSSID": "70:4f:57:a5:3a:60", "SSID": "Akkhor", "capabilities": "[WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS][WPS][WFA-HT]", "frequency": 2417, "level": -53, "timestamp": 264057362487}}
+    }
+  },[])
 
 
   return (
@@ -44,16 +55,21 @@ function Reminder({ route, navigation }) {
         </View>{/**box header container */}
         <ScrollView style={styles.reminderContainer}>
           {reminderItem.map((item, index) => {
-            return (<View style={styles.reminderItem}>
-              <Text key={index}>{item.text}</Text>
+            return (<View key={index} style={styles.reminderItem}>
+              <Text >{item.text}</Text>
               <View style={styles.reminderBtnContainer}>
-                <Button title='Edit'></Button>
-                <Button title='Delete'></Button>
+                <Icon.Button backgroundColor={'#252954'} color={'#9294A7'} name='edit'></Icon.Button>
+                <AntIcon.Button backgroundColor={'#252954'} color={'#9294A7'} name='delete'></AntIcon.Button>
               </View>
             </View>)
           })}
         </ScrollView>{ /**reminder container */}
       </View>
+      <View style={styles.tabContainer}>
+                <Icon.Button name="home" size={30} backgroundColor="#252954" color="#E64F59" ></Icon.Button>
+                <Icon.Button name="plus" size={30} backgroundColor="#252954" color="#E64F59" ></Icon.Button>
+                <Icon.Button name='align-justify' size={30} backgroundColor="#252954" color="#E64F59"></Icon.Button>
+            </View>
     </SafeAreaView>
   )
 }
@@ -94,7 +110,17 @@ const styles = StyleSheet.create({
   reminderBtnContainer:{
     flexDirection:'row',
     justifyContent:'space-evenly'
-  }
+  },
+  tabContainer:{
+    backgroundColor:"#252954",
+    width:windowWidth,
+    height:60,
+    flexDirection:'row',
+    justifyContent:'space-around',
+    alignItems:'center',
+    borderTopLeftRadius:20,
+    borderTopRightRadius:20
+}
 
 });
 
