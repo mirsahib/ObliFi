@@ -18,6 +18,10 @@ Install dependencies. Make sure you already have nodejs(16+),yarn and react-nati
 yarn install
 ```
 
+## Feature
+- Tag an wifi access point(AP)
+- Add/Edit/Delete reminder that belong to the AP
+- Get Notification when the device is out of AP signal
 
 
 ## Contribution
