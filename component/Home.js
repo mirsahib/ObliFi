@@ -91,7 +91,7 @@ function Home({navigation}) {
                 {wifiList.map((item, index) => {
                     return (
                         <TouchableOpacity key={index} style={styles.item} onPress={()=>navigation.navigate("Reminder",{
-                            wifiItem:item
+                            apName:item
                         })} >
                             <View>
                                 <Icon name="wifi" size={30} color="#252954" />
