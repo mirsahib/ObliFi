@@ -1,59 +1,73 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import {
   SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
   View,
-  FlatList,
   ScrollView,
   Dimensions,
-  Image,
-  TouchableOpacity,
-  Button, TextInput
+  TextInput
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import AntIcon from 'react-native-vector-icons/AntDesign'
+import uuid from 'react-native-uuid';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 
 const windowWidth = Dimensions.get('window').width;
 
-const reminderItem = [{
-  id: 1,
-  text: "Laptop charger", editable: false
-}, {
-  id: 2,
-  text: "Mobile charger", editable: false
-}, {
-  id: 3,
-  text: "Car key", editable: false
-}, {
-  id: 4,
-  text: "Pen", editable: false
-},{
-  id: 5,
-  text: "Turn of the Ac", editable: false
-}
-]
+
 
 function Reminder({ route, navigation }) {
-  const { wifiItem } = route.params
-  console.log(wifiItem)
-  const [reminderList, setReminderList] = useState(reminderItem)
+  const { apName } = route.params
+  const [APname,setAPName] = useState(apName)
+  const [reminderList, setReminderList] = useState([])
 
+  const loadReminderList = useCallback(async () => {
+    try {
+      console.log('app mount load list')
+      console.log('aPname ',APname.SSID)
+      const apName = APname.SSID
+      const data = await AsyncStorage.getItem(apName)
+      console.log(data)
+       if (data !== null) {
+        const reminderList = JSON.parse(data)
+        setReminderList(reminderList)
+      } else {
+        console.log('data is null')
+      }
+    } catch (e) {
+      console.log('error', e)
+    }
+  },[])
+  const saveReminderList = async () => {
+    try {
+      const apName = APname.SSID
+      console.log('reminder list before save',reminderList)
+      await AsyncStorage.setItem(apName,JSON.stringify(reminderList))
+    } catch (e) {
+      console.log('error', e)
+    }
+  }
 
   useEffect(() => {
-    if (!wifiItem) {
-      wifiItem = { "BSSID": "50:d2:f5:b8:b5:01", "SSID": "Miraj", "capabilities": "[WPA-PSK-TKIP+CCMP][WPA2-PSK-TKIP+CCMP][RSN-PSK-TKIP+CCMP][ESS][WPS][WFA-HT]", "frequency": 2462, "level": -50, "timestamp": 263177937827, "wifiItem": { "BSSID": "70:4f:57:a5:3a:60", "SSID": "Akkhor", "capabilities": "[WPA2-PSK-CCMP][RSN-PSK-CCMP][ESS][WPS][WFA-HT]", "frequency": 2417, "level": -53, "timestamp": 264057362487 } }
-    }
-  }, [])
+    loadReminderList()
+  }, [loadReminderList])
 
-  const editFunction = (id) => {
-    console.log('edit', reminderItem[id-1])
-    const newReminderList = reminderItem.map(item=>{
-      if(item.id===id){
-        item.editable=!item.editable
-      }else{
-        item.editable=false
+  useEffect(()=>{
+    saveReminderList()
+  },[reminderList,APname])
+
+
+  const toggleEditBtn = (id) => {
+    console.log('edit', id)
+    const newReminderList = reminderList.map(item => {
+      if (item.id === id) {
+        item.editable = !item.editable
+      } else {
+        item.editable = false
       }
       return item
     })
@@ -61,8 +75,28 @@ function Reminder({ route, navigation }) {
   }
   const deleteFunction = (id) => {
     console.log('delete', id)
-    const newReminderList = reminderList.filter(item=>{
-      return item.id!=id
+    const newReminderList = reminderList.filter(item => {
+      return item.id != id
+    })
+    setReminderList(newReminderList)
+  }
+  const addReminder = () => {
+    const newReminder = {
+      id: uuid.v4(),
+      text: 'Add item',
+      editable: false
+    }
+    reminderList.push(newReminder)
+    console.log('from add reminder',reminderList)
+    setReminderList([...reminderList])
+    
+  }
+  const editText = (text, id) => {
+    const newReminderList = reminderList.map(item => {
+      if (item.id === id) {
+        item.text = text
+      }
+      return item
     })
     setReminderList(newReminderList)
   }
@@ -71,15 +105,15 @@ function Reminder({ route, navigation }) {
     <SafeAreaView style={styles.container} >
       <View style={styles.wrapper}>
         <View style={styles.headerContainer}>
-          <Text style={{ color: 'white' }}>Access point: {wifiItem.SSID}</Text>
+          <Text style={{ color: 'white' }}>Access point: {apName.SSID}</Text>
           <Text style={{ color: 'white' }}>Reminder: {reminderList.length}</Text>
         </View>{/**box header container */}
         <ScrollView style={styles.reminderContainer}>
           {reminderList.map((item) => {
             return (<View key={item.id} style={styles.reminderItem}>
-              {item.editable ? <TextInput style={styles.textInput} value={item.text} /> : <Text>{item.text}</Text>}
+              {item.editable ? <TextInput style={styles.textInput} value={item.text} onChangeText={(text) => editText(text, item.id)} /> : <Text>{item.text}</Text>}
               <View style={styles.reminderBtnContainer}>
-                <Icon.Button backgroundColor={'#252954'} color={'#9294A7'} name='edit' onPress={() => editFunction(item.id)}></Icon.Button>
+                <Icon.Button backgroundColor={'#252954'} color={'#9294A7'} name='edit' onPress={() => toggleEditBtn(item.id)}></Icon.Button>
                 <AntIcon.Button backgroundColor={'#252954'} color={'#9294A7'} name='delete' onPress={() => deleteFunction(item.id)}></AntIcon.Button>
               </View>
             </View>)
@@ -87,8 +121,8 @@ function Reminder({ route, navigation }) {
         </ScrollView>{ /**reminder container */}
       </View>
       <View style={styles.tabContainer}>
-        <Icon.Button name="home" size={30} backgroundColor="#252954" color="#E64F59" ></Icon.Button>
-        <Icon.Button name="plus" size={30} backgroundColor="#252954" color="#E64F59" ></Icon.Button>
+        <Icon.Button name="home" size={30} backgroundColor="#252954" color="#E64F59" onPress={() => navigation.navigate('Home')} ></Icon.Button>
+        <Icon.Button name="plus" size={30} backgroundColor="#252954" color="#E64F59" onPress={addReminder}></Icon.Button>
         <Icon.Button name='align-justify' size={30} backgroundColor="#252954" color="#E64F59"></Icon.Button>
       </View>
     </SafeAreaView>
